@@ -341,17 +341,45 @@
             }
         }
 
-        function clearAllData() {
-            if (confirm('XÓA TẤT CẢ dữ liệu? Hành động này không thể hoàn tác.')) {
-                plans = [];
-                savePlans();
-            }
-        }
+// Đường link lưu trữ đám mây của riêng bạn
+const BLOB_URL = "https://jsonblob.com/api/jsonBlob/019eeaa8-89d8-7fa0-8885-547161b95247"; 
 
-        // Khởi tạo
-        window.onload = function() {
+// Hàm dùng để LƯU dữ liệu lên mạng khi bạn Thêm/Xóa/Sửa kế hoạch
+function savePlans() {
+    fetch(BLOB_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(plans)
+    })
+    .then(response => {
+        if(!response.ok) console.error("Lỗi khi đồng bộ dữ liệu lên mạng");
+    });
+}
+
+// Hàm dùng để XÓA TẤT CẢ dữ liệu
+function clearAllData() {
+    if (confirm('XÓA TẤT CẢ dữ liệu? Hành động này không thể hoàn tác.')) {
+        plans = [];
+        savePlans();
+        renderAll(); 
+    }
+}
+
+// TỰ ĐỘNG LẤY DỮ LIỆU TỪ MẠNG VỀ KHI MỞ TRANG WEB
+window.onload = function() {
+    fetch(BLOB_URL)
+        .then(response => response.json())
+        .then(data => {
+            // Nếu trên mạng có dữ liệu thì lấy, nếu chưa có gì thì để mảng rỗng
+            plans = data && data.plans ? data.plans : (Array.isArray(data) ? data : []); 
+            renderAll(); 
+        })
+        .catch(error => {
+            console.error("Không thể tải dữ liệu đám mây:", error);
+            plans = [];
             renderAll();
-        };
+        });
+};
     </script>
 </body>
 </html>
